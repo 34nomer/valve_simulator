@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from register16 import Register16
 from os import system
-
+from input_check import choice_function_from_dict
 
 class Device(object):
     def __init__(self):
@@ -52,69 +52,50 @@ class ZDV(Device):
         return
 
     def auto_act(self):
+        """автоматический режим"""
         print("вызвана функция Автоматическое обновление модели")
         pass
 
     def get_command(self):
-        print("вызвана функция Установить новый параметр")
-        user_input = ""
-        while user_input.lower() != "q":
-            self.only_show()
-            print("q - для выхода ")
-            for command in self.dict_commands:
-                print("выберите функцию")
-                print(f"{command} ")
-            user_input = input()
-            for command in self.dict_commands:
-                if user_input.lower() == command:
-                    self.dict_commands[command]()
-            if command.lower() == "q":
-                continue
-            else:
-                print("Неизвестная команда")
+        """подача команды управления"""
+        choice_function_from_dict(self.dict_commands, "Выберите команду которую хотите подать")
 
     def set_bit(self):
+        """установить бит в регистре"""
         print("вызвана функция Установить бит")
         pass
 
     def set_register(self):
+        """изменение значения регистра"""
         print("вызвана функция установить новое значение регистра")
 
     def open(self):
+        """пустить на открытие"""
         print("вызвана функция открыть задвижку")
 
     def close(self):
+        """пустить на закрытие"""
         print("вызвана функция закрыть задвижку")
 
     def stop(self):
+        """остановить """
         print("вызвана функция остановить задвижку")
 
     def set_in_between(self):
+        """оставить в промежутке """
         print("вызвана функция установить промежуток")
 
     def set_opened(self):
+        """оставить открытой"""
         print("вызвана функция установить задвижку в положение 'Открыто'")
 
     def set_closed(self):
+        """оставить закрытой"""
         print("вызвана функция установить задвижку в положение 'Закрыто'")
 
     def management(self):
+        choice_function_from_dict(self.dict_functions, "Выберите, что вы хотите сделать")
 
-        user_input = ""
-        while user_input.lower() != "q":
-            self.only_show()
-            print("q - для выхода ")
-            print("выберите функцию")
-            for function in self.dict_functions:
-                print(f"{function}")
-            user_input = input()
-            for function in self.dict_functions:
-                if user_input.lower() == function:
-                    self.dict_functions[function]()
-            if user_input.lower() == "q":
-                continue
-            else:
-                print("Неизвестная команда")
 
 
 
