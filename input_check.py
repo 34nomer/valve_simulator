@@ -1,4 +1,5 @@
 from os import system
+
 def input_uint(comment="", min=False, max=False):
     assert min > 0 if min != False else True
     assert max > 0 if max != False else True
@@ -21,7 +22,7 @@ def input_uint(comment="", min=False, max=False):
 
 
 def choice_function_from_dict(dictionary, prefix=""):
-    """"""
+    """Select and run a command from the dictionary"""
     user_input = ""
     while user_input.lower() != "q":
         system('cls')
