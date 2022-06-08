@@ -9,7 +9,6 @@ class Device(object):
         self.dct_settings = {}
         self.state = {}
 
-
     @abstractmethod
     def show(self):
         """"""
