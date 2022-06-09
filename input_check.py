@@ -1,25 +1,5 @@
 from os import system
 
-def input_uint(comment="", min=False, max=False):
-    assert min > 0 if min != False else True
-    assert max > 0 if max != False else True
-    assert max > min,  "Максимальное значение диапазона должно быть больше минимального  "
-    while True:
-        user_text = input(comment)
-        if not user_text.isdigit():
-            print("this is not 'int' digit")
-        else:
-            user_int = int(user_text)
-            if min and min > user_int:
-                print("below bottom range" + " min=" + str(min))
-                continue
-            if max and max < user_int:
-                print("above upper range" + " max=" + str(max))
-                continue
-            break
-
-    return user_int
-
 
 def choice_function_from_dict(dictionary, prefix=""):
     """Select and run a command from the dictionary"""
@@ -40,7 +20,23 @@ def choice_function_from_dict(dictionary, prefix=""):
             print("Неизвестная команда")
 
 
-
-
-
-
+def choice_object_from_list(list, prefix=""):  #TODO называется плохо, переделать
+    """Choice and return from list"""
+    user_input_str = ""
+    list_len = len(list)
+    while user_input_str.lower() != "q":
+        system('cls')
+        for i in range(list_len):
+            print(f"{i}: <{list[i]}>")
+        print(prefix)
+        print("q - для выхода")
+        user_input_str = input("введите номер нужного объекта")
+        if user_input_str.lower() == "q":
+            continue
+        if user_input_str.isdigit():
+            user_input_int = int(user_input_str)
+            if 0 <= user_input_int < list_len:
+                return user_input_int
+        else:
+            continue
+    return None
