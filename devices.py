@@ -23,6 +23,58 @@ class Device(object):
     def management(self):
         """"""
 
+    def set_register(self):
+        """Изменение значения регистра"""
+        print("вызвана функция установить новое значение регистра")
+        count_regs = len(self.lst_registers)
+        for i in range(count_regs):
+            print(f"{i}: {self.lst_registers[i]}")
+        register_offset = choice_object_from_list(self.lst_registers)
+        if register_offset is None:
+            return False
+
+        if self.change_register(register_offset):
+            print("значение регистра изменено")
+
+    def change_register(self, offset):
+        """Изменение регистра"""
+
+        while True:
+            user_str = input("введите новое значение регистра /n <b> для изменения битов мент")
+            if user_str.lower() == "q":
+                return None
+            if user_str.lower() == "b":
+                register = self.set_bit(self.lst_registers[offset])
+                if register is None:
+                    continue
+                self.lst_registers[offset] = register
+            if not user_str.isdigit():
+                continue
+            user_int = int(user_str)
+            if 0 <= user_int <= 65535:
+                self.lst_registers[offset] = Register16(user_int)
+                return True
+
+    def set_bit(self, register):
+        """Установить бит в регистре"""
+        print("вызвана функция Установить бит")
+        user_bit_offset = ""
+        user_bit = ""
+        while user_bit_offset != "q":
+            print(register)
+            user_bit_offset = input("Введите номер бита")
+            if user_bit_offset.isdigit():
+                int_user_input = int(user_bit_offset)
+                if 0 <= int_user_input <= 15:
+                    while user_bit != "q":
+                        user_bit = input("Введите значение бита")
+                        if user_bit.isdigit():
+                            user_bit_int = int(user_bit)
+                            if 0 <= user_bit_int <= 1:
+                                register[int_user_input] = user_bit_int
+                                break
+        return register
+
 
 class ZDV(Device):
     def __init__(self):
@@ -60,58 +112,6 @@ class ZDV(Device):
     def get_command(self):
         """Подача команды управления"""
         choice_function_from_dict(self.dict_commands, "Выберите команду которую хотите подать")
-
-    def set_bit(self, register):
-        """Установить бит в регистре"""
-        print("вызвана функция Установить бит")
-        user_bit_offset = ""
-        user_bit = ""
-        while user_bit_offset != "q":
-            print(register)
-            user_bit_offset = input("Введите номер бита")
-            if user_bit_offset.isdigit():
-                int_user_input = int(user_bit_offset)
-                if 0 <= int_user_input <= 15:
-                    while user_bit != "q":
-                        user_bit = input("Введите значение бита")
-                        if user_bit.isdigit():
-                            user_bit_int = int(user_bit)
-                            if 0 <= user_bit_int <= 1:
-                                register[int_user_input] = user_bit_int
-                                break
-        return register
-
-    def set_register(self):
-        """Изменение значения регистра"""
-        print("вызвана функция установить новое значение регистра")
-        count_regs = len(self.lst_registers)
-        for i in range(count_regs):
-            print(f"{i}: {self.lst_registers[i]}")
-        register_offset = choice_object_from_list(self.lst_registers)
-        if register_offset is None:
-            return False
-
-        if self.change_register(register_offset):
-            print("значение регистра изменено")
-
-    def change_register(self, offset):
-        """Изменение регистра"""
-
-        while True:
-            user_str = input("введите новое значение регистра /n <b> для изменения битов мент")
-            if user_str.lower() == "q":
-                return None
-            if user_str.lower() == "b":
-                register = self.set_bit(self.lst_registers[offset])
-                if register is None:
-                    continue
-                self.lst_registers[offset] = register
-            if not user_str.isdigit():
-                continue
-            user_int = int(user_str)
-            if 0 <= user_int <= 65535:
-                self.lst_registers[offset] = Register16(user_int)
-                return True
 
     def open(self):
         """Пустить на открытие"""
@@ -181,6 +181,9 @@ class ZDV(Device):
 
     def management(self):
         choice_function_from_dict(self.dict_functions, "Выберите, что вы хотите сделать")
+
+
+
 
 
 zdv1 = ZDV()
