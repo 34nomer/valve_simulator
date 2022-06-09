@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from register16 import Register16
 from os import system
 from input_check import choice_function_from_dict
@@ -53,16 +53,16 @@ class ZDV(Device):
         return
 
     def auto_act(self):
-        """автоматический режим"""
+        """Автоматический режим"""
         print("вызвана функция Автоматическое обновление модели")
         pass
 
     def get_command(self):
-        """подача команды управления"""
+        """Подача команды управления"""
         choice_function_from_dict(self.dict_commands, "Выберите команду которую хотите подать")
 
     def set_bit(self, register):
-        """установить бит в регистре"""
+        """Установить бит в регистре"""
         print("вызвана функция Установить бит")
         user_bit_offset = ""
         user_bit = ""
@@ -82,7 +82,7 @@ class ZDV(Device):
         return register
 
     def set_register(self):
-        """изменение значения регистра"""
+        """Изменение значения регистра"""
         print("вызвана функция установить новое значение регистра")
         count_regs = len(self.lst_registers)
         for i in range(count_regs):
@@ -96,7 +96,6 @@ class ZDV(Device):
 
     def change_register(self, offset):
         """Изменение регистра"""
-        user_str = ""
 
         while True:
             user_str = input("введите новое значение регистра /n <b> для изменения битов мент")
@@ -115,7 +114,7 @@ class ZDV(Device):
                 return True
 
     def open(self):
-        """пустить на открытие"""
+        """Пустить на открытие"""
         print("вызвана функция открыть задвижку")
         self.lst_registers[0][0] = 0  # 1-Механизм в положении "открыто"
         self.lst_registers[0][1] = 0  # 1-Механизм в положении "закрыто"
@@ -126,7 +125,7 @@ class ZDV(Device):
         self.lst_registers[2] = 550   # Текущее положение от 0 до 1000
 
     def close(self):
-        """пустить на закрытие"""
+        """Пустить на закрытие"""
         print("вызвана функция закрыть задвижку")
         self.lst_registers[0][0] = 0  # 1-Механизм в положении "открыто"
         self.lst_registers[0][1] = 0  # 1-Механизм в положении "закрыто"
@@ -148,7 +147,7 @@ class ZDV(Device):
         self.lst_registers[2] = 500  # Текущее положение от 0 до 1000
 
     def set_in_between(self):
-        """оставить в промежутке """
+        """Оставить в промежутке """
         print("вызвана функция установить промежуток")
         self.lst_registers[0][0] = 0  # 1-Механизм в положении "открыто"
         self.lst_registers[0][1] = 0  # 1-Механизм в положении "закрыто"
@@ -159,7 +158,7 @@ class ZDV(Device):
         self.lst_registers[2] = 500  # Текущее положение от 0 до 1000
 
     def set_opened(self):
-        """оставить открытой"""
+        """Оставить открытой"""
         print("вызвана функция установить задвижку в положение 'Открыто'")
         self.lst_registers[0][0] = 1  # 1-Механизм в положении "открыто"
         self.lst_registers[0][1] = 0  # 1-Механизм в положении "закрыто"
@@ -170,7 +169,7 @@ class ZDV(Device):
         self.lst_registers[2] = 1000  # Текущее положение от 0 до 1000
 
     def set_closed(self):
-        """оставить закрытой"""
+        """Оставить закрытой"""
         print("вызвана функция установить задвижку в положение 'Закрыто'")
         self.lst_registers[0][0] = 0  # 1-Механизм в положении "открыто"
         self.lst_registers[0][1] = 0  # 1-Механизм в положении "закрыто"
