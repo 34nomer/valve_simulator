@@ -6,10 +6,10 @@ from input_check import choice_object_from_list
 
 
 class Device(object):
-    def __init__(self):
+    def __init__(self, name="1"):
         self.lst_registers = []
         self.dct_settings = {}
-        self.state = {}
+        self.state = {"name": name}
 
         self.dict_functions = {"show": self.show,
                                "auto": self.auto_act,
@@ -80,10 +80,9 @@ class Device(object):
         return register
 
 
-
 class ZDV(Device):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name=1):
+        super().__init__(name)
         for i in range(126):
             self.lst_registers.append(Register16(0))
         self.dict_functions = {"auto": self.auto_act,
@@ -96,11 +95,11 @@ class ZDV(Device):
                               "set_opened": self.open,
                               "set_closed": self.close,
                               }
-        self.state = {}
         self.possible_state = {}
 
     def show(self):
         """Показывает себя в консоли"""
+        print(self.state["name"])
         for i in range(5):
             print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
 
@@ -188,8 +187,9 @@ class ZDV(Device):
 
 class SimpleDevice(Device):
     """"Простое устройство"""
-    def __init__(self, size=100):
-        super().__init__()
+    MAX_SIZE = 200
+    def __init__(self, name=1, size=100):
+        super().__init__(name)
         for i in range(size):
             self.lst_registers.append(Register16(0))
         self.dict_functions = {"auto": self.auto_act,
@@ -209,6 +209,3 @@ class SimpleDevice(Device):
         for i in range(size):
             print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
 
-
-device = SimpleDevice(10)
-device.management()
