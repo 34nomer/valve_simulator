@@ -23,6 +23,9 @@ class Device(object):
     @abstractmethod
     def auto_act(self):
         """"""
+    def __str__(self):
+        """Кратко о себе"""
+        return f"Устройство {self.state['name']} из {len(self.lst_registers)} регистров"
 
     def management(self):
         choice_function_from_dict(self.dict_functions, "Выберите, что вы хотите сделать")
@@ -184,6 +187,9 @@ class ZDV(Device):
         self.lst_registers[1][0] = 0  # 1-Срабатывание времятоковой защиты
         self.lst_registers[2] = 0  # Текущее положение от 0 до 1000
 
+    def __str__(self):
+        """Кратко о себе"""
+        return f"Задвижка — {self.state['name']} "
 
 class SimpleDevice(Device):
     """"Простое устройство"""
