@@ -11,17 +11,21 @@ class Device(object):
         self.dct_settings = {}
         self.state = {}
 
+        self.dict_functions = {"show": self.show,
+                               "auto": self.auto_act,
+                               "register": self.set_register,
+                               }
+
     @abstractmethod
     def show(self):
-        """"""
+        """Показывает себя в консоли"""
 
     @abstractmethod
     def auto_act(self):
         """"""
 
-    @abstractmethod
     def management(self):
-        """"""
+        choice_function_from_dict(self.dict_functions, "Выберите, что вы хотите сделать")
 
     def set_register(self):
         """Изменение значения регистра"""
@@ -76,6 +80,7 @@ class Device(object):
         return register
 
 
+
 class ZDV(Device):
     def __init__(self):
         super().__init__()
@@ -84,7 +89,7 @@ class ZDV(Device):
         self.dict_functions = {"auto": self.auto_act,
                                "command": self.get_command,
                                "registers": self.set_register,
-                               }
+                               "show": self.show}
         self.dict_commands = {"open": self.open,
                               "close": self.close,
                               "in_between": self.set_in_between,
@@ -95,8 +100,9 @@ class ZDV(Device):
         self.possible_state = {}
 
     def show(self):
+        """Показывает себя в консоли"""
         for i in range(5):
-            print(f"{i}: {self.lst_registers[i]}")
+            print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
 
     def only_show(self):
         system('cls')  # Очистка экрана
@@ -179,13 +185,30 @@ class ZDV(Device):
         self.lst_registers[1][0] = 0  # 1-Срабатывание времятоковой защиты
         self.lst_registers[2] = 0  # Текущее положение от 0 до 1000
 
-    def management(self):
-        choice_function_from_dict(self.dict_functions, "Выберите, что вы хотите сделать")
+
+class SimpleDevice(Device):
+    """"Простое устройство"""
+    def __init__(self, size=100):
+        super().__init__()
+        for i in range(size):
+            self.lst_registers.append(Register16(0))
+        self.dict_functions = {"auto": self.auto_act,
+                               "registers": self.set_register,
+                               "show": self.show,
+                               }
+        self.state = {"size": size}
+        self.possible_state = {}
+
+    def auto_act(self):
+        """Ничего не делает"""
+        print("Выбрана команда автоматический")
+
+    def show(self):
+        """Показывает себя в консоли"""
+        size = self.state["size"]
+        for i in range(size):
+            print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
 
 
-
-
-
-zdv1 = ZDV()
-zdv1.show()
-zdv1.management()
+device = SimpleDevice(10)
+device.management()
