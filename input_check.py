@@ -20,14 +20,15 @@ def choice_function_from_dict(dictionary, prefix=""):
             print("Неизвестная команда")
 
 
-def choice_object_from_list(list, prefix=""):  #TODO называется плохо, переделать
+def choice_object_from_list(user_list, prefix=""):  #TODO называется плохо, переделать
     """Choice and return from list"""
     user_input_str = ""
-    list_len = len(list)
+    assert isinstance(user_list, list)
+    list_len = len(user_list)
     while user_input_str.lower() != "q":
         system('cls')
-        for i in range(list_len):
-            print(f"{i}: <{list[i]}>")
+        for index, element in enumerate(user_list):
+            print(f"{index}: <{element}>")
         print(prefix)
         print("q - для выхода")
         user_input_str = input("введите номер нужного объекта")
