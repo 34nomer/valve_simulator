@@ -1,5 +1,5 @@
 from devices import ZDV, SimpleDevice
-from input_check import choice_function_from_dict
+from input_check import choice_function_from_dict, choice_object_from_list
 
 
 class DeviceManager(object):
@@ -51,6 +51,10 @@ class DeviceManager(object):
     def delete_device(self):
         """Удалить устройство"""
         print("вызвана функция удалить устройство")
+        index = choice_object_from_list(self.lst_devices, "введите номер удаляемого устройства")
+        if index is not None:
+            print("Должно удалиться из списка устройств")
+            self.lst_devices.pop(index)
 
     def show_devices(self):
         """Показать все устройства"""
