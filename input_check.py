@@ -20,7 +20,7 @@ def choice_function_from_dict(dictionary, prefix=""):
             print("Неизвестная команда")
 
 
-def choice_object_from_list(user_list, prefix=""):  #TODO называется плохо, переделать
+def choice_object_from_list(user_list, prefix=""):  # TODO называется плохо, переделать
     """Choice and return from list"""
     user_input_str = ""
     assert isinstance(user_list, list)

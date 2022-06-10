@@ -2,6 +2,7 @@ class Register16(list):
     """16 bit registers """
 
     def __init__(self, value):
+        super(Register16, self).__init__()
         self.append(value)
 
     def as_bit_str(self):

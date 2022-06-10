@@ -64,7 +64,5 @@ class DeviceManager(object):
             device.show()
 
     def get_command(self):
-        """Подать каманду"""
+        """Подать команду"""
         choice_function_from_dict(self.possible_action, "Выберите, команду которую вы хотите подать ")
-
-
