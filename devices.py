@@ -127,7 +127,7 @@ class ZDV(Device):
         self.lst_registers[0][8] = 1  # 1 - Выполняется операция закрытия
         self.lst_registers[0][9] = 0  # 1 - Выполняется операция закрытия
         self.lst_registers[1][0] = 0  # 1-Срабатывание времятоковой защиты
-        self.lst_registers[2] = 550   # Текущее положение от 0 до 1000
+        self.lst_registers[2] = 550  # Текущее положение от 0 до 1000
 
     def close(self):
         """Пустить на закрытие"""
@@ -188,7 +188,8 @@ class ZDV(Device):
 class SimpleDevice(Device):
     """"Простое устройство"""
     MAX_SIZE = 200
-    def __init__(self, name=1, size=100):
+
+    def __init__(self, name="1", size=100):
         super().__init__(name)
         for i in range(size):
             self.lst_registers.append(Register16(0))
@@ -196,7 +197,8 @@ class SimpleDevice(Device):
                                "registers": self.set_register,
                                "show": self.show,
                                }
-        self.state = {"size": size}
+        self.state["name"] = name
+        self.state["size"] = size
         self.possible_state = {}
 
     def auto_act(self):
@@ -205,7 +207,7 @@ class SimpleDevice(Device):
 
     def show(self):
         """Показывает себя в консоли"""
+        print(self.state["name"])
         size = self.state["size"]
         for i in range(size):
             print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
-
