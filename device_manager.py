@@ -55,4 +55,12 @@ class DeviceManager(object):
     def show_devices(self):
         """Показать все устройства"""
         print("Выбрана функция показать все устройства")
+        for device in self.lst_devices:
+            print("*" * 79)
+            device.show()
+
+    def get_command(self):
+        """Подать каманду"""
+        choice_function_from_dict(self.possible_action, "Выберите, команду которую вы хотите подать ")
+
 
