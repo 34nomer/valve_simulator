@@ -69,6 +69,8 @@ class Device(object):
         user_bit = ""
         while user_bit_offset != "q":
             print(register)
+            for bit in range(16):
+                print(f"   {register.info_bit(bit)}")
             user_bit_offset = input("Введите номер бита")
             if user_bit_offset.isdigit():
                 int_user_input = int(user_bit_offset)
@@ -88,6 +90,29 @@ class ZDV(Device):
         super().__init__(name)
         for i in range(126):
             self.lst_registers.append(Register16(0))
+
+        self.lst_registers[0].change_info("Технологический регистр")
+        self.lst_registers[0].change_bit_info(0, '0 бит  1 – Механизм в положении «Открыто»')
+        self.lst_registers[0].change_bit_info(1, '1 бит  1 – Механизм в положении «Закрыто»')
+        self.lst_registers[0].change_bit_info(2, '2 бит  1 – Сработала муфта')
+        self.lst_registers[0].change_bit_info(3, '3 бит  Резерв')
+        self.lst_registers[0].change_bit_info(4, '4 бит  Резерв')
+        self.lst_registers[0].change_bit_info(5, '5 бит  Резерв')
+        self.lst_registers[0].change_bit_info(6, '6 бит  Резерв')
+        self.lst_registers[0].change_bit_info(7, '7 бит  1 – Включён режим «Дистанционное управление»')
+        self.lst_registers[0].change_bit_info(8, '8 бит  1 – Выполняется операция «Открытие»')
+        self.lst_registers[0].change_bit_info(9, '9 бит  1 – Выполняется операция «Закрытие»')
+        self.lst_registers[0].change_bit_info(10, '10 бит  1 – Режим работы «Стоп»')
+        self.lst_registers[0].change_bit_info(11, '11 бит  Резерв')
+        self.lst_registers[0].change_bit_info(12, '12 бит  Резерв')
+        self.lst_registers[0].change_bit_info(13, '13 бит  1 – Включён подогрев блока')
+        self.lst_registers[0].change_bit_info(14, '14 бит  Резерв')
+        self.lst_registers[0].change_bit_info(15, '15 бит  Резерв')
+
+        self.lst_registers[1].change_info("Регистр дефектов")
+        self.lst_registers[2].change_info("Регистр текущего положения")
+        self.lst_registers[3].change_info("Регистр команд")
+
         self.dict_functions = {"auto": self.auto_act,
                                "command": self.get_command,
                                "registers": self.set_register,
@@ -104,7 +129,7 @@ class ZDV(Device):
         """Показывает себя в консоли"""
         print(self.state["name"])
         for i in range(5):
-            print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}")
+            print(f"{i}: {self.lst_registers[i]}    | {int(self.lst_registers[i])}  | {self.lst_registers[i].info()}")
 
     def only_show(self):
         system('cls')  # Очистка экрана
@@ -190,6 +215,7 @@ class ZDV(Device):
     def __str__(self):
         """Кратко о себе"""
         return f"Задвижка — {self.state['name']} "
+
 
 class SimpleDevice(Device):
     """"Простое устройство"""
