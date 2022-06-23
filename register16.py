@@ -1,9 +1,12 @@
 class Register16(list):
     """16 bit registers """
+    REGISTER_STATE = ()
 
     def __init__(self, value):
         super(Register16, self).__init__()
         self.append(value)
+        self._info = "Простой регистр"
+        self._info_bit = [f"{i} бит" for i in range(16)]
 
     def as_bit_str(self):
         """returns its own value as a string of bits
@@ -31,3 +34,24 @@ class Register16(list):
 
     def __int__(self):
         return super().__getitem__(0)
+
+    def info(self):
+        """return information about the register"""
+        return self._info
+
+    def info_bit(self, bit: int):
+        """return information about the bit in the register"""
+        assert isinstance(bit, int)
+        assert 0 <= bit <= 15
+        return self._info_bit[bit]
+
+    def change_info(self, new_info):
+        assert isinstance(new_info, str)
+        self._info = new_info
+        return 0
+
+    def change_bit_info(self, bit: int, new_bit_info: str):
+        assert isinstance(bit, int)
+        assert 0 <= bit <= 15
+        assert isinstance(new_bit_info, str)
+        self._info_bit[bit] = new_bit_info
