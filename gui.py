@@ -1,8 +1,8 @@
-import sys
-
 from PyQt5.QtGui import QIcon
-#from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QAction, qApp
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QAction, qApp
 from PyQt5 import QtWidgets as QtW
+from devices import ZDV
+import sys
 
 
 class GuiImitator(QtW.QMainWindow):
@@ -44,7 +44,10 @@ class GuiImitator(QtW.QMainWindow):
         self.device_tab = DeviceTab(self.central_widget)
         self.vbox_central_widget.addWidget(self.device_tab)
 
-        self.device_list = ["simpledevice", "zdап1", "uzs"]
+        self.device_list = [ZDV("входная агрегатная"), ZDV("выкидная"), ZDV("восьмая"),
+                            ZDV("третья"), ZDV("четвертая"), ZDV("пятая"),
+                            ZDV("шестая"), ZDV("седьмая"),
+                            ]
         self.device_tab.update_state(self.device_list)
         self.setCentralWidget(self.central_widget)
 
@@ -103,10 +106,10 @@ class DeviceTab(QtW.QTabWidget):
         print("Вышли из цикла")
         print(self.device_lst)
         for device in deviсe_lst:
-            self.add_device(str(device))# TODO подставить сюда наши виджеты
+            self.add_device(device)# TODO подставить сюда наши виджеты
 
     def add_device(self, device):  # TODO подставить сюда наши виджеты
-        device = ZDVWidget(str(device))
+        device = ZDVWidget(device)
         self.addTab(device, str(device))
         self.device_lst.append(device)
 
@@ -128,7 +131,7 @@ class ZDVWidget(QtW.QWidget):
         self.zdv = zdv
         self.vbox = QtW.QVBoxLayout(self)
         self.vbox.setObjectName("vbox")
-        self.state_lbl = QtW.QLabel(self.zdv + " Состояние ")
+        self.state_lbl = QtW.QLabel(str(self.zdv) + " Состояние ")
 
         self.automaticaly_rb = QtW.QRadioButton(self)
         self.automaticaly_rb.setText("Автоматический режим")
@@ -139,20 +142,10 @@ class ZDVWidget(QtW.QWidget):
         self.mode_layout.addWidget(self.automaticaly_rb)
         self.mode_layout.addWidget(self.manual_rb)
         self.mode_layout.addWidget(self.mode_select_btn)
-
-        self.registers = (("регистр статуса", "значение"),
-                          ("регистр аварий", "Значение"),
-                          ("Процент открытия", "Значение"),
-                          ("Управление", "Значение"),
-                          )
-        self.registers_lbls = []
-        self.registers_layout = QtW.QFormLayout()
-        for index, (name, value) in enumerate(self.registers):
-            name_lbl = QtW.QLabel(name)
-            value_lbl = QtW.QLabel(value)
-            self.registers_lbls.append((name_lbl, value_lbl))
-            self.registers_layout.setWidget(index, QtW.QFormLayout.LabelRole, name_lbl)
-            self.registers_layout.setWidget(index, QtW.QFormLayout.FieldRole, value_lbl)
+        self.register_widgets = []
+        for i in range(4):
+            self.register_widgets.append(RegisterWidget(register=self.zdv.lst_registers[i],
+                                                        parent=self))
 
         self.progressBar = QtW.QProgressBar(self)
         self.progressBar.setValue(24)
@@ -161,34 +154,18 @@ class ZDVWidget(QtW.QWidget):
         self.full_stroke_time_lbl = QtW.QLabel("Время полного хода")
         self.dead_time_lbl = QtW.QLabel("Время схода с концевиков")
         self.time_form_layout = QtW.QFormLayout()
-
         self.time_form_layout.setWidget(0, QtW.QFormLayout.LabelRole, self.full_stroke_time_lbl)
         self.time_form_layout.setWidget(0, QtW.QFormLayout.FieldRole, self.full_stroke_time_le)
         self.time_form_layout.setWidget(1, QtW.QFormLayout.LabelRole, self.dead_time_lbl)
         self.time_form_layout.setWidget(1, QtW.QFormLayout.FieldRole, self.dead_time_le)
-
-        self.bits = {"0.0": dict(text="КВО", value=True, state=1),
-                     "0.1": dict(text="КВЗ", value=True, state=1),
-                     "1.0": dict(text="авария", value=True, state=1)}
-        self.bits_check_box = []
-        self.bits_layout = QtW.QVBoxLayout()
-        self.bits_layout.setObjectName("bits_layout")
-
-        for key in sorted(self.bits):
-            check_box = QtW.QCheckBox(str(self.bits[key]["text"]))
-            check_box.setObjectName(str(self.bits[key]["text"]))
-            self.bits_check_box.append(check_box)
-            self.bits_layout.addWidget(check_box)
-
         self.vbox.addWidget(self.state_lbl)
         self.vbox.addStretch(1)
         self.vbox.addLayout(self.mode_layout)
-        self.vbox.addStretch(1)
-        self.vbox.addLayout(self.registers_layout)
-        self.vbox.addWidget(self.progressBar)
         self.vbox.addLayout(self.time_form_layout)
-        self.vbox.addLayout(self.registers_layout)
-        self.vbox.addLayout(self.bits_layout)
+        self.vbox.addStretch(1)
+        self.vbox.addWidget(self.progressBar)
+        for widget in self.register_widgets:
+            self.vbox.addWidget(widget)
 
     def __str__(self):
         return str(self.zdv)
@@ -197,8 +174,38 @@ class ZDVWidget(QtW.QWidget):
 class RegisterWidget(QtW.QWidget):
     def __init__(self, register, parent):
         super(RegisterWidget, self).__init__(parent)
+        self.register = register
         self.info_register_lbl = QtW.QLabel(register.info())
-        self.value_register_lbl = QtW.QLabel(str(register))
+        self.value_register_lbl = QtW.QLabel(f"{register}  |  {int(register)}")
+        self.layout = QtW.QHBoxLayout(self)
+        self.layout.addWidget(self.info_register_lbl)
+        self.layout.addWidget(self.value_register_lbl)
+
+    def mouseDoubleClickEvent(self, event):
+        dialog = ChangeRegisterDialog(self)
+        dialog.show()
+
+
+class ChangeRegisterDialog(QtW.QDialog):
+    def __init__(self, parent):
+        super(ChangeRegisterDialog, self).__init__(parent)
+        register = parent.register
+        self.setWindowTitle("Обновите значение регистра")
+        q_btn = QtW.QDialogButtonBox.Ok | QtW.QDialogButtonBox.Cancel
+        self.button_box = QtW.QDialogButtonBox(q_btn)
+        self.layout = QtW.QVBoxLayout(self)
+        message = QtW.QLabel(register.info())
+        self.bit_checkboxes = []
+        for bit in range(16):
+            bit_checkbox = QtW.QCheckBox(register.info_bit(bit))
+            self.bit_checkboxes.append(bit_checkbox)
+        input_line = QtW.QLineEdit(str(int(register)))
+
+        self.layout.addWidget(message)
+        self.layout.addWidget(input_line)
+        self.layout.addWidget(self.button_box)
+        for bit_checkbox in self.bit_checkboxes:
+            self.layout.addWidget(bit_checkbox)
 
 
 if __name__ == "__main__":
