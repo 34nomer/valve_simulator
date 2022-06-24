@@ -2,6 +2,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QAction, qApp
 from PyQt5 import QtWidgets as QtW
 from devices import ZDV
+from register16 import Register16
 import sys
 
 
@@ -189,23 +190,36 @@ class RegisterWidget(QtW.QWidget):
 class ChangeRegisterDialog(QtW.QDialog):
     def __init__(self, parent):
         super(ChangeRegisterDialog, self).__init__(parent)
-        register = parent.register
+        self.register = parent.register
+        self.input_line = QtW.QLineEdit()
         self.setWindowTitle("Обновите значение регистра")
         q_btn = QtW.QDialogButtonBox.Ok | QtW.QDialogButtonBox.Cancel
         self.button_box = QtW.QDialogButtonBox(q_btn)
         self.layout = QtW.QVBoxLayout(self)
-        message = QtW.QLabel(register.info())
+        message = QtW.QLabel(self.register.info())
         self.bit_checkboxes = []
         for bit in range(16):
-            bit_checkbox = QtW.QCheckBox(register.info_bit(bit))
+            bit_checkbox = QtW.QCheckBox(self.register.info_bit(bit))
             self.bit_checkboxes.append(bit_checkbox)
-        input_line = QtW.QLineEdit(str(int(register)))
 
         self.layout.addWidget(message)
-        self.layout.addWidget(input_line)
+        self.layout.addWidget(self.input_line)
         self.layout.addWidget(self.button_box)
         for bit_checkbox in self.bit_checkboxes:
             self.layout.addWidget(bit_checkbox)
+
+    def editingFinished(self, event):
+        print(event)
+
+        user_value = self.input_line.text()
+
+        if not user_value.isdigit():
+            # self.input_line.setText("")
+            return
+        int_user_value = int(user_value)
+        if 0 <= int_user_value < 2**16:
+            self.register[0] = 1
+        return
 
 
 if __name__ == "__main__":
