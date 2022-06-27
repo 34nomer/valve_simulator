@@ -148,6 +148,9 @@ class ZDV(Device):
                               }
         self.possible_state = {}
 
+        self.state["full_stroke_time"] = 60
+        self.state["dead_time"] = 10
+
     def show(self):
         """Показывает себя в консоли"""
         print(self.state["name"])
