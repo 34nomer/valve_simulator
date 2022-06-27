@@ -198,7 +198,7 @@ class ChangeRegisterDialog(QtW.QDialog):
         q_btn = QtW.QDialogButtonBox.Ok | QtW.QDialogButtonBox.Cancel
         self.button_box = QtW.QDialogButtonBox(q_btn)
         self.button_box.button(QtW.QDialogButtonBox.Ok).setText("Применить")
-        self.button_box.accepted.connect(self.the_editingFinished)
+        self.button_box.accepted.connect(self.the_editing_finished)
         self.button_box.rejected.connect(self.reject)
 
         self.layout = QtW.QVBoxLayout(self)
@@ -206,6 +206,9 @@ class ChangeRegisterDialog(QtW.QDialog):
         self.bit_checkboxes = []
         for bit in range(16):
             bit_checkbox = QtW.QCheckBox(self.register.info_bit(bit))
+            print(self.register[bit])
+            bit_checkbox.setChecked((self.register[bit]) == "1")
+            bit_checkbox.clicked.connect(self.change_bit)
             self.bit_checkboxes.append(bit_checkbox)
 
         self.layout.addWidget(message)
@@ -214,8 +217,18 @@ class ChangeRegisterDialog(QtW.QDialog):
         for bit_checkbox in self.bit_checkboxes:
             self.layout.addWidget(bit_checkbox)
 
-    def the_editingFinished(self):
+    def change_bit(self):
+        print("Установить бит")
+        for i, checkbox in enumerate(self.bit_checkboxes):
+            if checkbox.isChecked():
+                self.register[i] = 1
+            else:
+                self.register[i] = 0
+        self.input_line.setText(f"{int(self.register)}")
+        self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
+        return
 
+    def the_editing_finished(self):
         print("жмакнута применить ")
         user_value = self.input_line.text()
         if not user_value.isdigit():
@@ -226,6 +239,8 @@ class ChangeRegisterDialog(QtW.QDialog):
             self.register.new_value(int_user_value)
             print(self.register)
             self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
+            for bit, bit_checkbox in enumerate(self.bit_checkboxes):
+                bit_checkbox.setChecked((self.register[bit]) == "1")
         else:
             self.input_line.setText(f"введите число от {0} до {2 ** 16 - 1}")
         return
