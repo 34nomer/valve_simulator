@@ -190,11 +190,17 @@ class RegisterWidget(QtW.QWidget):
 class ChangeRegisterDialog(QtW.QDialog):
     def __init__(self, parent):
         super(ChangeRegisterDialog, self).__init__(parent)
+        self.parent = parent
         self.register = parent.register
         self.input_line = QtW.QLineEdit()
+        self.input_line.setText(f"{int(self.register)}")
         self.setWindowTitle("Обновите значение регистра")
         q_btn = QtW.QDialogButtonBox.Ok | QtW.QDialogButtonBox.Cancel
         self.button_box = QtW.QDialogButtonBox(q_btn)
+        self.button_box.button(QtW.QDialogButtonBox.Ok).setText("Применить")
+        self.button_box.accepted.connect(self.the_editingFinished)
+        self.button_box.rejected.connect(self.reject)
+
         self.layout = QtW.QVBoxLayout(self)
         message = QtW.QLabel(self.register.info())
         self.bit_checkboxes = []
@@ -208,17 +214,20 @@ class ChangeRegisterDialog(QtW.QDialog):
         for bit_checkbox in self.bit_checkboxes:
             self.layout.addWidget(bit_checkbox)
 
-    def editingFinished(self, event):
-        print(event)
+    def the_editingFinished(self):
 
+        print("жмакнута применить ")
         user_value = self.input_line.text()
-
         if not user_value.isdigit():
-            # self.input_line.setText("")
+            self.input_line.setText(f"введите число от {0} до {2**16 - 1}")
             return
         int_user_value = int(user_value)
         if 0 <= int_user_value < 2**16:
-            self.register[0] = 1
+            self.register.new_value(int_user_value)
+            print(self.register)
+            self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
+        else:
+            self.input_line.setText(f"введите число от {0} до {2 ** 16 - 1}")
         return
 
 

@@ -55,3 +55,12 @@ class Register16(list):
         assert 0 <= bit <= 15
         assert isinstance(new_bit_info, str)
         self._info_bit[bit] = new_bit_info
+
+    def new_value(self, value: int):
+        assert isinstance(value, int),  "Ожидается Значение INT"
+        if 0 <= value < 2**16:
+            register = Register16(value)
+            for i in range(16):
+                self[i] = register[i]
+            return 0
+        return 1
