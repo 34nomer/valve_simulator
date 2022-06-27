@@ -150,10 +150,20 @@ class ZDVWidget(QtW.QWidget):
 
         self.progressBar = QtW.QProgressBar(self)
         self.progressBar.setValue(24)
+        self.progressBar.setToolTip("Процент открытия")
+
         self.full_stroke_time_le = QtW.QLineEdit(self)
-        self.dead_time_le = QtW.QLineEdit(self)
+        self.full_stroke_time_le.setText(f"{self.zdv.state['full_stroke_time']}")
+        self.full_stroke_time_le.setToolTip("число от 5 до 600")
+        self.full_stroke_time_le.editingFinished.connect(self.change_full_stroke_time)
         self.full_stroke_time_lbl = QtW.QLabel("Время полного хода, c")
+
+        self.dead_time_le = QtW.QLineEdit(self)
+        self.dead_time_le.setText(f"{self.zdv.state['dead_time']}")
         self.dead_time_lbl = QtW.QLabel("Время схода с концевиков, c")
+        self.dead_time_le.setToolTip("число до четверти времени хода")
+        self.dead_time_le.editingFinished.connect(self.change_dead_time)
+
         self.time_form_layout = QtW.QFormLayout()
         self.time_form_layout.setWidget(0, QtW.QFormLayout.LabelRole, self.full_stroke_time_lbl)
         self.time_form_layout.setWidget(0, QtW.QFormLayout.FieldRole, self.full_stroke_time_le)
@@ -170,6 +180,34 @@ class ZDVWidget(QtW.QWidget):
 
     def __str__(self):
         return str(self.zdv)
+
+    def change_full_stroke_time(self):
+        new_full_stroke_time = self.full_stroke_time_le.text()
+        if new_full_stroke_time.isdigit():
+            if 5 <= int(new_full_stroke_time) <= 600:
+                self.zdv.state["full_stroke_time"] = int(new_full_stroke_time)
+                self.full_stroke_time_le.setText(f'{self.zdv.state["full_stroke_time"]}')
+                print("Значение полный ход задвижки изменено")
+            else:
+                print("введите корректное значение")
+                self.full_stroke_time_le.setText(f'введите корректное значение')
+        else:
+            self.full_stroke_time_le.setText(f'введите число')
+        return
+
+    def change_dead_time(self):
+        new_dead_time = self.dead_time_le.text()
+        if new_dead_time.isdigit():
+            if 0 <= int(new_dead_time) <= self.zdv.state["full_stroke_time"]//4:
+                self.zdv.state["dead_time"] = int(new_dead_time)
+                self.dead_time_le.setText(f'{self.zdv.state["dead_time"]}')
+                print("Значение времени схода с концевика изменено")
+            else:
+                print("введите корректное значение")
+                self.dead_time_le.setText(f'введите корректное значение')
+        else:
+            self.dead_time_le.setText(f'введите число')
+        return
 
 
 class RegisterWidget(QtW.QWidget):
