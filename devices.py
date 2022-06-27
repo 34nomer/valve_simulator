@@ -110,6 +110,29 @@ class ZDV(Device):
         self.lst_registers[0].change_bit_info(15, '15 бит  Резерв')
 
         self.lst_registers[1].change_info("Регистр дефектов")
+
+        self.lst_registers[1].change_bit_info(0, '0 бит  1 – Срабатывание время-токовой защиты')
+        self.lst_registers[1].change_bit_info(1, '1 бит  1 – Срабатывание защиты от короткого' +
+                                                 ' замыкания в цепи фаз двигателя')
+        self.lst_registers[1].change_bit_info(2, '2 бит  1 – Срабатывание защиты от перегрева электродвигателя')
+        self.lst_registers[1].change_bit_info(3,
+                                              '3 бит  1 – Срабатывание защиты от пониженного напряжения входной сети')
+        self.lst_registers[1].change_bit_info(4, '4 бит  Резерв')
+        self.lst_registers[1].change_bit_info(5, '5 бит  1 – Срабатывание защиты «Отсутствие движения»')
+        self.lst_registers[1].change_bit_info(6,
+                                              '6 бит  1 – Срабатывание защиты от повышенного напряжения входной сети')
+        self.lst_registers[1].change_bit_info(7, '7 бит  1 – Срабатывание защиты по обрыву фаз входной питающей сети')
+        self.lst_registers[1].change_bit_info(8, '8 бит  Резерв')
+        self.lst_registers[1].change_bit_info(9, '9 бит  1 – Срабатывание защиты по перегреву блока свыше 110˚С')
+        self.lst_registers[1].change_bit_info(10, '10 бит  Резерв')
+        self.lst_registers[1].change_bit_info(11, '11 бит  Резерв')
+        self.lst_registers[1].change_bit_info(12, '12 бит  1 – Срабатывание защиты по неверному чередованию фаз' +
+                                                  ' сети на силовом входе блока')
+        self.lst_registers[1].change_bit_info(13,
+                                              '13 бит  1 – Срабатывание защиты по неверному чередованию фаз двигателя')
+        self.lst_registers[1].change_bit_info(14, '14 бит  Резерв')
+        self.lst_registers[1].change_bit_info(15, '15 бит  Резерв')
+
         self.lst_registers[2].change_info("Регистр текущего положения")
         self.lst_registers[3].change_info("Регистр команд")
 
