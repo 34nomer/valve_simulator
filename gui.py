@@ -152,8 +152,8 @@ class ZDVWidget(QtW.QWidget):
         self.progressBar.setValue(24)
         self.full_stroke_time_le = QtW.QLineEdit(self)
         self.dead_time_le = QtW.QLineEdit(self)
-        self.full_stroke_time_lbl = QtW.QLabel("Время полного хода")
-        self.dead_time_lbl = QtW.QLabel("Время схода с концевиков")
+        self.full_stroke_time_lbl = QtW.QLabel("Время полного хода, c")
+        self.dead_time_lbl = QtW.QLabel("Время схода с концевиков, c")
         self.time_form_layout = QtW.QFormLayout()
         self.time_form_layout.setWidget(0, QtW.QFormLayout.LabelRole, self.full_stroke_time_lbl)
         self.time_form_layout.setWidget(0, QtW.QFormLayout.FieldRole, self.full_stroke_time_le)
@@ -181,6 +181,8 @@ class RegisterWidget(QtW.QWidget):
         self.layout = QtW.QHBoxLayout(self)
         self.layout.addWidget(self.info_register_lbl)
         self.layout.addWidget(self.value_register_lbl)
+        self.setToolTip("Двойной щелчок для редактирования")
+        self.setStatusTip(register.info())
 
     def mouseDoubleClickEvent(self, event):
         dialog = ChangeRegisterDialog(self)
