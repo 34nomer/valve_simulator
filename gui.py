@@ -1,8 +1,6 @@
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QMessageBox, QAction, qApp
 from PyQt5 import QtWidgets as QtW
 from devices import ZDV
-from register16 import Register16
 import sys
 
 
@@ -57,8 +55,8 @@ class GuiImitator(QtW.QMainWindow):
         """
 
         reply = QtW.QMessageBox.question(self, "Подтверждение выхода",
-                                     "Хотите выйти ?", QtW.QMessageBox.Yes |
-                                     QtW.QMessageBox.No, QtW.QMessageBox.No)
+                                         "Хотите выйти ?", QtW.QMessageBox.Yes |
+                                         QtW.QMessageBox.No, QtW.QMessageBox.No)
         if reply == QtW.QMessageBox.Yes:
             e.accept()
         else:
@@ -85,7 +83,7 @@ class NetworkGui(QtW.QFrame):
         baud_rate.sizeHint()
         self.lbl_list.append(baud_rate)
         parity = QtW.QLabel()
-        parity.setText(f"Четность{self.settings['parity']}" if 'parity' in self.settings else "no pariry check")
+        parity.setText(f"Четность{self.settings['parity']}" if 'parity' in self.settings else "no parity check")
         parity.sizeHint()
         self.lbl_list.append(parity)
 
@@ -99,17 +97,17 @@ class DeviceTab(QtW.QTabWidget):
         super(DeviceTab, self).__init__(parent)
         self.device_lst = []
 
-    def update_state(self, deviсe_lst):
+    def update_state(self, device_list):
         while len(self.device_lst) > 0:
             self.device_lst.pop(0)
             self.removeTab(0)
             print(self.device_lst)
         print("Вышли из цикла")
         print(self.device_lst)
-        for device in deviсe_lst:
-            self.add_device(device)# TODO подставить сюда наши виджеты
+        for device in device_list:
+            self.add_device(device)  # TODO подставить сюда наши виджеты
 
-    def add_device(self, device):  # TODO подставить сюда наши виджеты
+    def add_device(self, device):   # TODO подставить сюда наши виджеты
         device = ZDVWidget(device)
         self.addTab(device, str(device))
         self.device_lst.append(device)
