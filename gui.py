@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets as QtW
+from PyQt5.QtCore import QTimer
 from devices import ZDV
 import sys
 
@@ -148,7 +149,8 @@ class ZDVWidget(QtW.QWidget):
                                                else "Перейти в автоматический режим", self)
         self.mode_select_btn.clicked.connect(lambda: self.set_auto_mod() if self.zdv.state["auto_mod"] == False
                                              else self.set_manual_mod())
-
+        self.auto_run_timer = QTimer(self)
+        self.auto_run_timer.timeout.connect(self.update)
         self.mode_layout = QtW.QHBoxLayout()
         self.mode_layout.addWidget(self.automaticaly_rb)
         self.mode_layout.addWidget(self.manual_rb)
@@ -224,12 +226,19 @@ class ZDVWidget(QtW.QWidget):
         self.automaticaly_rb.setChecked(True)
         self.mode_select_btn.setText("Перейти в ручной режим")
         self.zdv.state["auto_mod"] = True
+        self.auto_run_timer.start(100)
 
     def set_manual_mod(self,):
         #print(bool)
         self.manual_rb.setChecked(True)
         self.mode_select_btn.setText("Перейти в автоматический режим")
         self.zdv.state["auto_mod"] = False
+        self.auto_run_timer.stop()
+
+    def update(self):
+        if self.progressBar.value() == 100:
+            self.progressBar.setValue(0)
+        self.progressBar.setValue(1+self.progressBar.value())
 
 
 class RegisterWidget(QtW.QWidget):
