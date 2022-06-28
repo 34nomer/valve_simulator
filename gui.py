@@ -147,21 +147,44 @@ class ZDVWidget(QtW.QWidget):
 
         self.mode_select_btn = QtW.QPushButton("Перейти в ручной режим" if self.zdv.state["auto_mod"]
                                                else "Перейти в автоматический режим", self)
-        self.mode_select_btn.clicked.connect(lambda: self.set_auto_mod() if self.zdv.state["auto_mod"] == False
+        self.mode_select_btn.clicked.connect(lambda: self.set_auto_mod() if not self.zdv.state["auto_mod"]
                                              else self.set_manual_mod())
-        self.auto_run_timer = QTimer(self)
-        self.auto_run_timer.timeout.connect(self.update)
         self.mode_layout = QtW.QHBoxLayout()
         self.mode_layout.addWidget(self.automaticaly_rb)
         self.mode_layout.addWidget(self.manual_rb)
         self.mode_layout.addWidget(self.mode_select_btn)
+
+        self.control_btns_lst = []
+        self.open_btn = QtW.QPushButton("Открыть", self)
+        self.open_btn.clicked.connect(self.zdv.open)
+        self.control_btns_lst.append(self.open_btn)
+
+        self.stop_btn = QtW.QPushButton("Стоп", self)
+        self.stop_btn.clicked.connect(self.zdv.stop)
+        self.control_btns_lst.append(self.stop_btn)
+
+        self.close_btn = QtW.QPushButton("Закрыть", self)
+        self.close_btn.clicked.connect(self.zdv.close)
+        self.control_btns_lst.append(self.close_btn)
+
+        for btn in self.control_btns_lst:
+            btn.setEnabled(self.zdv.state["auto_mod"])
+
+        self.control_btn_layout = QtW.QHBoxLayout()
+        self.control_btn_layout.addWidget(self.open_btn)
+        self.control_btn_layout.addWidget(self.stop_btn)
+        self.control_btn_layout.addWidget(self.close_btn)
+
+        self.auto_run_timer = QTimer(self)
+        self.auto_run_timer.timeout.connect(self.update)
+
         self.register_widgets = []
         for i in range(4):
             self.register_widgets.append(RegisterWidget(register=self.zdv.lst_registers[i],
                                                         parent=self))
 
         self.progressBar = QtW.QProgressBar(self)
-        self.progressBar.setValue(24)
+        self.progressBar.setValue(self.zdv.state["opening_rate"]//10)
         self.progressBar.setToolTip("Процент открытия")
 
         self.full_stroke_time_le = QtW.QLineEdit(self)
@@ -183,12 +206,13 @@ class ZDVWidget(QtW.QWidget):
         self.time_form_layout.setWidget(1, QtW.QFormLayout.FieldRole, self.dead_time_le)
         self.vbox.addWidget(self.state_lbl)
         self.vbox.addLayout(self.mode_layout)
-        self.vbox.addLayout(self.time_form_layout)
 
         self.vbox.addWidget(self.progressBar)
+        self.vbox.addLayout(self.control_btn_layout)
         for widget in self.register_widgets:
             self.vbox.addWidget(widget)
         self.vbox.addStretch(1)
+        self.vbox.addLayout(self.time_form_layout)
 
     def __str__(self):
         return str(self.zdv)
@@ -222,23 +246,29 @@ class ZDVWidget(QtW.QWidget):
         return
 
     def set_auto_mod(self,):
-        #print(bool)
+
         self.automaticaly_rb.setChecked(True)
         self.mode_select_btn.setText("Перейти в ручной режим")
         self.zdv.state["auto_mod"] = True
-        self.auto_run_timer.start(100)
+        self.auto_run_timer.start(500)
+        for btn in self.control_btns_lst:
+            btn.setEnabled(self.zdv.state["auto_mod"])
 
     def set_manual_mod(self,):
-        #print(bool)
+
         self.manual_rb.setChecked(True)
         self.mode_select_btn.setText("Перейти в автоматический режим")
         self.zdv.state["auto_mod"] = False
         self.auto_run_timer.stop()
+        for btn in self.control_btns_lst:
+            btn.setEnabled(self.zdv.state["auto_mod"])
 
     def update(self):
-        if self.progressBar.value() == 100:
-            self.progressBar.setValue(0)
-        self.progressBar.setValue(1+self.progressBar.value())
+        super(ZDVWidget, self).update()
+        self.zdv.auto_act()
+        self.progressBar.setValue(self.zdv.state["opening_rate"]//10)
+        for register_wdg in self.register_widgets:
+            register_wdg.update()
 
 
 class RegisterWidget(QtW.QWidget):
@@ -252,6 +282,10 @@ class RegisterWidget(QtW.QWidget):
         self.layout.addWidget(self.value_register_lbl)
         self.setToolTip("Двойной щелчок для редактирования")
         self.setStatusTip(register.info())
+
+    def update(self):
+        super(RegisterWidget, self).update()
+        self.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
 
     def mouseDoubleClickEvent(self, event):
         dialog = ChangeRegisterDialog(self)
@@ -296,7 +330,7 @@ class ChangeRegisterDialog(QtW.QDialog):
             else:
                 self.register[i] = 0
         self.input_line.setText(f"{int(self.register)}")
-        self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
+        self.parent.update()
         return
 
     def the_editing_finished(self):
@@ -309,7 +343,7 @@ class ChangeRegisterDialog(QtW.QDialog):
         if 0 <= int_user_value < 2 ** 16:
             self.register.new_value(int_user_value)
             print(self.register)
-            self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
+            self.parent.update()
             for bit, bit_checkbox in enumerate(self.bit_checkboxes):
                 bit_checkbox.setChecked((self.register[bit]) == "1")
         else:
