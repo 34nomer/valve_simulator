@@ -150,6 +150,7 @@ class ZDV(Device):
 
         self.state["full_stroke_time"] = 60
         self.state["dead_time"] = 10
+        self.state["auto_mod"] = False
 
     def show(self):
         """Показывает себя в консоли"""
