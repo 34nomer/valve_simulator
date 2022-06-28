@@ -66,6 +66,7 @@ class GuiImitator(QtW.QMainWindow):
 class NetworkGui(QtW.QFrame):
     """Виджет состояния сети
     """
+
     def __init__(self, parent_widget, network_settings: dict):
         super(NetworkGui, self).__init__(parent_widget)
         self.setFrameShadow(QtW.QFrame.Sunken)
@@ -93,6 +94,7 @@ class NetworkGui(QtW.QFrame):
 
 class DeviceTab(QtW.QTabWidget):
     """Таблица с устройствами"""
+
     def __init__(self, parent):
         super(DeviceTab, self).__init__(parent)
         self.device_lst = []
@@ -107,7 +109,7 @@ class DeviceTab(QtW.QTabWidget):
         for device in device_list:
             self.add_device(device)  # TODO подставить сюда наши виджеты
 
-    def add_device(self, device):   # TODO подставить сюда наши виджеты
+    def add_device(self, device):  # TODO подставить сюда наши виджеты
         device = ZDVWidget(device)
         self.addTab(device, str(device))
         self.device_lst.append(device)
@@ -125,6 +127,7 @@ class DeviceTab(QtW.QTabWidget):
 class ZDVWidget(QtW.QWidget):
     """Виджет отображение задвижки
     """
+
     def __init__(self, zdv):
         super(ZDVWidget, self).__init__()
         self.zdv = zdv
@@ -134,9 +137,18 @@ class ZDVWidget(QtW.QWidget):
 
         self.automaticaly_rb = QtW.QRadioButton(self)
         self.automaticaly_rb.setText("Автоматический режим")
+        self.automaticaly_rb.clicked.connect(self.set_auto_mod)
+
         self.manual_rb = QtW.QRadioButton(self)
         self.manual_rb.setText("Ручной режим")
-        self.mode_select_btn = QtW.QPushButton("режим", self)
+        self.manual_rb.clicked.connect(self.set_manual_mod)
+        self.manual_rb.setChecked(not self.zdv.state["auto_mod"])
+
+        self.mode_select_btn = QtW.QPushButton("Перейти в ручной режим" if self.zdv.state["auto_mod"]
+                                               else "Перейти в автоматический режим", self)
+        self.mode_select_btn.clicked.connect(lambda: self.set_auto_mod() if self.zdv.state["auto_mod"] == False
+                                             else self.set_manual_mod())
+
         self.mode_layout = QtW.QHBoxLayout()
         self.mode_layout.addWidget(self.automaticaly_rb)
         self.mode_layout.addWidget(self.manual_rb)
@@ -168,13 +180,13 @@ class ZDVWidget(QtW.QWidget):
         self.time_form_layout.setWidget(1, QtW.QFormLayout.LabelRole, self.dead_time_lbl)
         self.time_form_layout.setWidget(1, QtW.QFormLayout.FieldRole, self.dead_time_le)
         self.vbox.addWidget(self.state_lbl)
-        self.vbox.addStretch(1)
         self.vbox.addLayout(self.mode_layout)
         self.vbox.addLayout(self.time_form_layout)
-        self.vbox.addStretch(1)
+
         self.vbox.addWidget(self.progressBar)
         for widget in self.register_widgets:
             self.vbox.addWidget(widget)
+        self.vbox.addStretch(1)
 
     def __str__(self):
         return str(self.zdv)
@@ -196,7 +208,7 @@ class ZDVWidget(QtW.QWidget):
     def change_dead_time(self):
         new_dead_time = self.dead_time_le.text()
         if new_dead_time.isdigit():
-            if 0 <= int(new_dead_time) <= self.zdv.state["full_stroke_time"]//4:
+            if 0 <= int(new_dead_time) <= self.zdv.state["full_stroke_time"] // 4:
                 self.zdv.state["dead_time"] = int(new_dead_time)
                 self.dead_time_le.setText(f'{self.zdv.state["dead_time"]}')
                 print("Значение времени схода с концевика изменено")
@@ -206,6 +218,18 @@ class ZDVWidget(QtW.QWidget):
         else:
             self.dead_time_le.setText(f'введите число')
         return
+
+    def set_auto_mod(self,):
+        #print(bool)
+        self.automaticaly_rb.setChecked(True)
+        self.mode_select_btn.setText("Перейти в ручной режим")
+        self.zdv.state["auto_mod"] = True
+
+    def set_manual_mod(self,):
+        #print(bool)
+        self.manual_rb.setChecked(True)
+        self.mode_select_btn.setText("Перейти в автоматический режим")
+        self.zdv.state["auto_mod"] = False
 
 
 class RegisterWidget(QtW.QWidget):
@@ -270,10 +294,10 @@ class ChangeRegisterDialog(QtW.QDialog):
         print("жмакнута применить ")
         user_value = self.input_line.text()
         if not user_value.isdigit():
-            self.input_line.setText(f"введите число от {0} до {2**16 - 1}")
+            self.input_line.setText(f"введите число от {0} до {2 ** 16 - 1}")
             return
         int_user_value = int(user_value)
-        if 0 <= int_user_value < 2**16:
+        if 0 <= int_user_value < 2 ** 16:
             self.register.new_value(int_user_value)
             print(self.register)
             self.parent.value_register_lbl.setText(f"{self.register}  |  {int(self.register)}")
