@@ -3,5 +3,7 @@ test.py
 \.__pycache__
 test_file.txt
 __pycache__
-
-/pics/
+/pics/*
+*.bmp
+*.png
+\.pics\
