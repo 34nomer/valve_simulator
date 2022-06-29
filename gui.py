@@ -177,6 +177,7 @@ class ZDVWidget(QtW.QWidget):
 
         self.auto_run_timer = QTimer(self)
         self.auto_run_timer.timeout.connect(self.update)
+        self.zdv.state["update_time"] = 500
 
         self.register_widgets = []
         for i in range(4):
@@ -250,7 +251,7 @@ class ZDVWidget(QtW.QWidget):
         self.automaticaly_rb.setChecked(True)
         self.mode_select_btn.setText("Перейти в ручной режим")
         self.zdv.state["auto_mod"] = True
-        self.auto_run_timer.start(500)
+        self.auto_run_timer.start(self.zdv.state["update_time"])
         for btn in self.control_btns_lst:
             btn.setEnabled(self.zdv.state["auto_mod"])
 

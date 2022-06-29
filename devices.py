@@ -153,6 +153,7 @@ class ZDV(Device):
         self.state["dead_time"] = 10
         self.state["auto_mod"] = False
         self.state["main_state"] = "Неопределенное состояние"
+        self.state["update_time"] = 100
 
     def show(self):
         """Показывает себя в консоли"""
@@ -176,7 +177,7 @@ class ZDV(Device):
         full_opened = self.lst_registers[0][0]
         full_closed = self.lst_registers[0][1]
         opening_degree = self.lst_registers[2]
-        if mpo == mpz == True:
+        if mpo == mpz is True:
             print("Обнаружено неправильное состояние")
             self.stop()
             return
@@ -188,17 +189,19 @@ class ZDV(Device):
             print("полностью закрыта")
             self.stop()
             return
+        step = int((self.state["update_time"] * 1000) / (self.state["full_stroke_time"] * 1000))
+        dead_zone = int(1000 * self.state["dead_time"] / self.state["full_stroke_time"])
         if mpo:
-            opening_degree.new_value(int(opening_degree) + 5)
+            opening_degree.new_value(int(opening_degree) + step)
         if mpz:
-            opening_degree.new_value(int(opening_degree) - 5)
+            opening_degree.new_value(int(opening_degree) - step)
         if int(opening_degree) >= 1000:
             self.lst_registers[0][0] = 1  # полностью открыта
-        elif self.lst_registers[0][0] and int(opening_degree) < 950:
+        elif self.lst_registers[0][0] and int(opening_degree) < 1000 - dead_zone:
             self.lst_registers[0][0] = 0
         if int(opening_degree) <= 0:
             self.lst_registers[0][1] = 1  # полностью закрыта
-        elif self.lst_registers[0][1] and int(opening_degree) > 50:
+        elif self.lst_registers[0][1] and int(opening_degree) > dead_zone:
             self.lst_registers[0][1] = 0
         return
 
@@ -227,6 +230,7 @@ class ZDV(Device):
         print("вызвана функция остановить задвижку")
         self.lst_registers[0][8] = 0  # 1 - Выполняется операция Открытия
         self.lst_registers[0][9] = 0  # 1 - Выполняется операция закрытия
+        self.lst_registers[3][0] = 0  # Сбросить команду на остановку
         self.state["main_state"] = "Команда стоп"
 
     def set_in_between(self):
