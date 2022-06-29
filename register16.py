@@ -30,7 +30,7 @@ class Register16(list):
 
     def __getitem__(self, item):
         bit_str = self.as_bit_str()[::-1]
-        return bit_str[item]
+        return bit_str[item] == "1"
 
     def __int__(self):
         return super().__getitem__(0)
