@@ -163,6 +163,11 @@ class ZDV(Device):
                               "set_opened": self.open,
                               "set_closed": self.close,
                               }
+        self.mpo = self.lst_registers[0][8]  # 1 - Выполняется операция Открытия
+        self.mpz = self.lst_registers[0][9]  # 1 - Выполняется операция закрытия
+        self.full_opened = self.lst_registers[0][0]
+        self.full_closed = self.lst_registers[0][1]
+
         self.possible_state = {}
 
         self.state["full_stroke_time"] = 60
@@ -186,12 +191,21 @@ class ZDV(Device):
     def auto_act(self):
         """Автоматический режим"""
         print("вызвана функция Автоматическое обновление модели")
+        self.mpo = self.lst_registers[0][8]  # Выполняется операция Открытия
+        self.mpz = self.lst_registers[0][9]  # Выполняется операция закрытия
+        self.full_opened = self.lst_registers[0][0]  # механизм в положении открыто
+        self.full_closed = self.lst_registers[0][1]  # механизм в положении закрыто
+
+        if self.crash():
+            self.stop()
+            self.state["main_state"] += " Неисправность"
+            return
+
         if self.need_stop():
             self.stop()
             return
 
         if self.wrong_state():
-            print("Обнаружено неправильное состояние")
             self.stop()
             return
 
@@ -204,6 +218,8 @@ class ZDV(Device):
             return
 
         self.change_opening_degree()
+
+        self.change_state()
 
     def get_command(self):
         """Подача команды управления"""
@@ -233,7 +249,7 @@ class ZDV(Device):
         self.lst_registers[0][8] = 0  # 1 - Выполняется операция Открытия
         self.lst_registers[0][9] = 0  # 1 - Выполняется операция закрытия
         self.lst_registers[3][0] = 0  # Сбросить команду на остановку
-        self.state["main_state"] = "Команда стоп"
+        self.state["main_state"] = "Вызвана команда Стоп"
 
     def set_in_between(self):
         """Оставить в промежутке """
@@ -269,19 +285,13 @@ class ZDV(Device):
         self.lst_registers[2] = 0  # Текущее положение от 0 до 1000
 
     def need_stop(self):
-        mpo = self.lst_registers[0][8]  # 1 - Выполняется операция Открытия
-        mpz = self.lst_registers[0][9]  # 1 - Выполняется операция закрытия
-        full_opened = self.lst_registers[0][0]
-        full_closed = self.lst_registers[0][1]
+        stop_command = self.lst_registers[3][0]
+        return stop_command or (self.mpo and self.full_opened) | (self.mpz and self.full_closed)
 
+    def crash(self):
         register_avar_is_not_empty = bool(int(self.lst_registers[1]))
         the_clutch_has_tripped = self.lst_registers[0][2]  # Сработала муфта
-        stop_command = self.lst_registers[3][0]
-        print(f"register_avar_is_not_empty {register_avar_is_not_empty}")
-        print(f"the_clutch_has_tripped {the_clutch_has_tripped}")
-        print(f"stop_command {stop_command}")
-        return register_avar_is_not_empty or the_clutch_has_tripped or stop_command \
-               or (mpo and full_opened) | (mpz and full_closed)
+        return register_avar_is_not_empty or the_clutch_has_tripped
 
     def need_open(self):
         return self.lst_registers[3][1]
@@ -290,19 +300,16 @@ class ZDV(Device):
         return self.lst_registers[3][2]
 
     def wrong_state(self):
-        mpo = self.lst_registers[0][8]
-        mpz = self.lst_registers[0][9]
-        return mpo == mpz is True
+        return self.mpo == self.mpz is True
 
     def change_opening_degree(self):
         opening_degree = self.lst_registers[2]
-        mpo = self.lst_registers[0][8]  # 1 - Выполняется операция Открытия
-        mpz = self.lst_registers[0][9]  # 1 - Выполняется операция закрытия
+
         step = int((self.state["update_time"] * 1000) / (self.state["full_stroke_time"] * 1000))
         dead_zone = int(1000 * self.state["dead_time"] / self.state["full_stroke_time"])
-        if mpo:
+        if self.mpo:
             opening_degree.new_value(int(opening_degree) + step)
-        if mpz:
+        if self.mpz:
             opening_degree.new_value(int(opening_degree) - step)
         if int(opening_degree) > 1000 - step:
             self.lst_registers[0][0] = 1  # полностью открыта
@@ -313,6 +320,22 @@ class ZDV(Device):
         elif self.lst_registers[0][1] and int(opening_degree) > dead_zone:
             self.lst_registers[0][1] = 0
         return
+
+    def change_state(self):
+
+        if self.mpo and not self.full_opened:
+            self.state["main_state"] = "Открывается"
+            return
+        if self.mpz and not self.full_closed:
+            self.state["main_state"] = "Закрывается"
+            return
+        if not self.full_closed and  not self.full_opened:
+            self.state["main_state"] = "В промежутке"
+            return
+        if self.full_closed:
+            self.state["main_state"] = "Закрыта"
+        if self.full_opened:
+            self.state["main_state"] = "Открыта"
 
     def __str__(self):
         """Кратко о себе"""
