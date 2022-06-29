@@ -33,6 +33,7 @@ class GuiImitator(QtW.QMainWindow):
         delete_device = QtW.QAction(QIcon('pics\\del.bmp'), "Удалить устройство", self)
         delete_device.setShortcut('Ctrl+X')
         delete_device.setStatusTip('Удалить устройство')
+        delete_device.triggered.connect(self.remove_current_zdv)
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu('Файл')
@@ -80,6 +81,13 @@ class GuiImitator(QtW.QMainWindow):
     def add_device(self):
         dialog = DeviceAdditionDialog(self)
         dialog.show()
+
+    def remove_current_zdv(self):
+        curent_device_index = self.device_tab.currentIndex()
+        released_adress = self.device_list[curent_device_index].adress
+        self.network_widget.free_adresses_lst.append(released_adress)
+        self.device_list.pop(curent_device_index)
+        self.device_tab.update_state(self.device_list)
 
 
 class DeviceAdditionDialog(QtW.QDialog):
@@ -152,7 +160,6 @@ class DeviceAdditionDialog(QtW.QDialog):
             return
 
         if self.choice_device_combox.currentText() == "ZDV":
-            print("i am herr")
             zdv = ZDV(name)
             zdv.adress = adress
             self.parent.device_list.append(zdv)
