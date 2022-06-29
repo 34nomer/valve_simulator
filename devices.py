@@ -171,10 +171,10 @@ class ZDV(Device):
         print("вызвана функция Автоматическое обновление модели")
         if self.need_stop():
             self.stop()
-        mpo = self.lst_registers[0][8] == "1"  # 1 - Выполняется операция Открытия
-        mpz = self.lst_registers[0][9] == "1" # 1 - Выполняется операция закрытия
-        full_opened = self.lst_registers[0][0] == "1"
-        full_closed = self.lst_registers[0][1] == "1"
+        mpo = self.lst_registers[0][8]  # 1 - Выполняется операция Открытия
+        mpz = self.lst_registers[0][9]  # 1 - Выполняется операция закрытия
+        full_opened = self.lst_registers[0][0]
+        full_closed = self.lst_registers[0][1]
         opening_degree = self.lst_registers[2]
         if mpo == mpz == True:
             print("Обнаружено неправильное состояние")
@@ -194,11 +194,11 @@ class ZDV(Device):
             opening_degree.new_value(int(opening_degree) - 5)
         if int(opening_degree) >= 1000:
             self.lst_registers[0][0] = 1  # полностью открыта
-        elif self.lst_registers[0][0] == "1" and int(opening_degree) < 950:
+        elif self.lst_registers[0][0] and int(opening_degree) < 950:
             self.lst_registers[0][0] = 0
         if int(opening_degree) <= 0:
             self.lst_registers[0][1] = 1  # полностью закрыта
-        elif self.lst_registers[0][1] == "1" and int(opening_degree) > 50:
+        elif self.lst_registers[0][1] and int(opening_degree) > 50:
             self.lst_registers[0][1] = 0
         return
 
@@ -264,8 +264,8 @@ class ZDV(Device):
 
     def need_stop(self):
         register_avar_is_not_empty = bool(int(self.lst_registers[1]))
-        the_clutch_has_tripped = self.lst_registers[0][2] == "1"  # Сработала муфта
-        stop_command = self.lst_registers[3][0] == "1"
+        the_clutch_has_tripped = self.lst_registers[0][2]  # Сработала муфта
+        stop_command = self.lst_registers[3][0]
         print(f"register_avar_is_not_empty {register_avar_is_not_empty}")
         print(f"the_clutch_has_tripped {the_clutch_has_tripped}")
         print(f"stop_command {stop_command}")

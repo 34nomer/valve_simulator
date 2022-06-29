@@ -313,7 +313,7 @@ class ChangeRegisterDialog(QtW.QDialog):
         for bit in range(16):
             bit_checkbox = QtW.QCheckBox(self.register.info_bit(bit))
             print(self.register[bit])
-            bit_checkbox.setChecked((self.register[bit]) == "1")
+            bit_checkbox.setChecked((self.register[bit]))
             bit_checkbox.clicked.connect(self.change_bit)
             self.bit_checkboxes.append(bit_checkbox)
 
@@ -346,7 +346,7 @@ class ChangeRegisterDialog(QtW.QDialog):
             print(self.register)
             self.parent.update()
             for bit, bit_checkbox in enumerate(self.bit_checkboxes):
-                bit_checkbox.setChecked((self.register[bit]) == "1")
+                bit_checkbox.setChecked((self.register[bit]))
         else:
             self.input_line.setText(f"введите число от {0} до {2 ** 16 - 1}")
         return
