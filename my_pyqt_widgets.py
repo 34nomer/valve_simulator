@@ -228,3 +228,14 @@ class ChangeRegisterDialog(QtW.QDialog):
         else:
             self.input_line.setText(f"введите число от {0} до {2 ** 16 - 1}")
         return
+
+
+def warning_message(title, text):
+    assert isinstance(title, str)
+    assert isinstance(text, str)
+    msg = QtW.QMessageBox()
+    msg.setWindowTitle(title)
+    msg.setText(text)
+    msg.setIcon(QtW.QMessageBox.Warning)
+    msg.exec_()
+    return
