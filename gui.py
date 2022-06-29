@@ -134,7 +134,7 @@ class ZDVWidget(QtW.QWidget):
         self.zdv = zdv
         self.vbox = QtW.QVBoxLayout(self)
         self.vbox.setObjectName("vbox")
-        self.state_lbl = QtW.QLabel(str(self.zdv) + " Состояние ")
+        self.state_lbl = QtW.QLabel(str(self.zdv) + " Состояние " + self.zdv.state["main_state"])
 
         self.automaticaly_rb = QtW.QRadioButton(self)
         self.automaticaly_rb.setText("Автоматический режим")
@@ -184,7 +184,7 @@ class ZDVWidget(QtW.QWidget):
                                                         parent=self))
 
         self.progressBar = QtW.QProgressBar(self)
-        self.progressBar.setValue(self.zdv.state["opening_rate"]//10)
+        self.progressBar.setValue(int(self.zdv.lst_registers[2])//10)
         self.progressBar.setToolTip("Процент открытия")
 
         self.full_stroke_time_le = QtW.QLineEdit(self)
@@ -266,7 +266,8 @@ class ZDVWidget(QtW.QWidget):
     def update(self):
         super(ZDVWidget, self).update()
         self.zdv.auto_act()
-        self.progressBar.setValue(self.zdv.state["opening_rate"]//10)
+        self.state_lbl.setText(str(self.zdv) + " Состояние " + self.zdv.state["main_state"])
+        self.progressBar.setValue(int(self.zdv.lst_registers[2])//10)
         for register_wdg in self.register_widgets:
             register_wdg.update()
 
