@@ -136,6 +136,22 @@ class ZDV(Device):
 
         self.lst_registers[2].change_info("Регистр текущего положения")
         self.lst_registers[3].change_info("Регистр команд")
+        self.lst_registers[3].change_bit_info(0, '0 бит  1 – Команда «СТОП»')
+        self.lst_registers[3].change_bit_info(1, '1 бит  1 – Команда «ОТКРЫТЬ»')
+        self.lst_registers[3].change_bit_info(2, '2 бит  1 – Команда «ЗАКРЫТЬ»')
+        self.lst_registers[3].change_bit_info(3, '3 бит  Резерв')
+        self.lst_registers[3].change_bit_info(4, '4 бит  Резерв')
+        self.lst_registers[3].change_bit_info(5, '5 бит  1 – Команда «Сброс защит»')
+        self.lst_registers[3].change_bit_info(6, '6 бит  Резерв')
+        self.lst_registers[3].change_bit_info(7, '7 бит  Резерв')
+        self.lst_registers[3].change_bit_info(8, '8 бит  1 – Команда «Выключить режим теста дискретных входов»')
+        self.lst_registers[3].change_bit_info(9, '9 бит  1 – Команда «Включить режим теста дискретных выходов»')
+        self.lst_registers[3].change_bit_info(10, '10 бит  1 – Команда «Выключить режим теста дискретных выходов»')
+        self.lst_registers[3].change_bit_info(11, '11 бит  Резерв')
+        self.lst_registers[3].change_bit_info(12, '12 бит  Резерв')
+        self.lst_registers[3].change_bit_info(13, '13 бит  Резерв')
+        self.lst_registers[3].change_bit_info(14, '14 бит  Резерв')
+        self.lst_registers[3].change_bit_info(15, '15 бит  Резерв')
 
         self.dict_functions = {"auto": self.auto_act,
                                "command": self.get_command,
