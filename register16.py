@@ -22,8 +22,15 @@ class Register16(list):
 
     def __setitem__(self, key, value):
         bit_str = self.as_bit_str()[::-1]
+        if isinstance(value, bool):
+            value = "1" if value else "0"
+        if isinstance(value, int):
+            value = "1" if value == 1 else "0"
 
-        bit_str = bit_str[0:key] + str(value) + bit_str[key + 1:]
+        assert isinstance(value, str)
+        assert value == "0" or value == "1"
+
+        bit_str = bit_str[0:key] + value + bit_str[key + 1:]
         bit_str = bit_str[::-1]
         new_register = int("0b" + bit_str, base=2)
         super(Register16, self).__setitem__(0, new_register)
