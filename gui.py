@@ -2,6 +2,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets as QtW
 from my_pyqt_widgets import ZDVWidget, warning_message
 from devices import ZDV
+import network_devices
 import sys
 
 
@@ -19,6 +20,11 @@ class GuiImitator(QtW.QMainWindow):
 
         self.statusBar().showMessage('Ready')
 
+        self.network_state = []
+        # self.network_state.append(network_devices.Parameter("Порт", "COM1"))
+        # self.network_state.append(network_devices.Parameter("Стоп бит", "1"))
+        # self.network_state.append(network_devices.Parameter("Четность", "none"))
+        self.network_state.append(network_devices.Parameter("скорость", "19200"))
         # меню
         exit_action = QtW.QAction(QIcon('pics\\exit.png'), 'Закрыть', self)
         exit_action.setShortcut('Ctrl+Q')
@@ -29,11 +35,13 @@ class GuiImitator(QtW.QMainWindow):
         new_device.setShortcut('Ctrl+A')
         new_device.setStatusTip('Добавить устройство')
         new_device.triggered.connect(self.add_device)
+        new_device.setEnabled(self.is_network_ok())
 
         delete_device = QtW.QAction(QIcon('pics\\del.bmp'), "Удалить устройство", self)
         delete_device.setShortcut('Ctrl+X')
         delete_device.setStatusTip('Удалить устройство')
         delete_device.triggered.connect(self.remove_current_zdv)
+        delete_device.setEnabled(self.is_network_ok())
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu('Файл')
@@ -43,19 +51,19 @@ class GuiImitator(QtW.QMainWindow):
         devices_menu.addAction(new_device)
         devices_menu.addAction(delete_device)
 
+
         # Тул бар
         self.toolbar = self.addToolBar('Выход')
         self.toolbar.addAction(exit_action)
         self.toolbar.addAction(new_device)
         self.toolbar.addAction(delete_device)
-        network_settings = {"port": "com1",
-                            "parity": "None",
-                            "baud_rate": "9600"}
+
+
 
         # главный виджет главного окна с вертикальной разметкой
         self.central_widget = QtW.QWidget(self)
         self.vbox_central_widget = QtW.QVBoxLayout(self.central_widget)
-        self.network_widget = NetworkGui(self, network_settings)
+        self.network_widget = NetworkGui(self, self.network_state)
         self.vbox_central_widget.addWidget(self.network_widget)
 
         self.device_tab = DeviceTab(self.central_widget)
@@ -65,6 +73,14 @@ class GuiImitator(QtW.QMainWindow):
         self.device_list = []
         self.device_tab.update_state(self.device_list)
         self.setCentralWidget(self.central_widget)
+
+    def is_network_ok(self):
+        if len(self.network_state) == 0:
+            return False
+        for state in self.network_state:
+            if state.empty():
+                return False
+        return True
 
     def closeEvent(self, e):
         """Уточнить при выходе
@@ -179,25 +195,13 @@ class NetworkGui(QtW.QFrame):
         self.lbl_list = []
         self.horizontalLayout = QtW.QHBoxLayout(self)
 
-        port = QtW.QLabel()
-        port.setText(f"Порт{self.settings['port']}" if 'port' in self.settings else "no port")
-        port.sizeHint()
-        self.lbl_list.append(port)
-        baud_rate = QtW.QLabel()
-        baud_rate.setText(f"Скорость{self.settings['baud_rate']}" if 'baud_rate' in self.settings else "no baud rate")
-        baud_rate.sizeHint()
-        self.lbl_list.append(baud_rate)
-        parity = QtW.QLabel()
-        parity.setText(f"Четность{self.settings['parity']}" if 'parity' in self.settings else "no parity check")
-        parity.sizeHint()
-        self.lbl_list.append(parity)
+        for setting in self.settings:
+             label = QtW.QLabel()
+             label.setText(setting.info())
+             self.lbl_list.append(label)
+             self.horizontalLayout.addWidget(label)
 
-        for label in self.lbl_list:
-            self.horizontalLayout.addWidget(label)
-        self.free_adresses_lst = [x for x in range(1, 247)]
-
-
-
+        self.free_adresses_lst = [x for x in range(1, 248)]
 
 
 class DeviceTab(QtW.QTabWidget):
