@@ -93,7 +93,7 @@ class ZDVWidget(QtW.QWidget):
         self.vbox.addLayout(self.time_form_layout)
 
     def __str__(self):
-        return str(self.zdv)
+        return f"({self.zdv.adress}) {self.zdv}"
 
     def change_full_stroke_time(self):
         new_full_stroke_time = self.full_stroke_time_le.text()
