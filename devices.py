@@ -339,7 +339,7 @@ class ZDV(Device):
 
     def __str__(self):
         """Кратко о себе"""
-        return f"Задвижка — {self.state['name']} "
+        return f"Задвижка-{self.state['name']} "
 
 
 class SimpleDevice(Device):
