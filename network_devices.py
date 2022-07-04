@@ -32,3 +32,6 @@ class Parameter(object):
 
     def empty(self):
         return self.value is None
+
+    def get_possible_states(self):
+        return self.possible_states
