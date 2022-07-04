@@ -21,11 +21,9 @@ class GuiImitator(QtW.QMainWindow):
         self.statusBar().showMessage('Ready')
 
         self.network_state = []
-        # self.network_state.append(network_devices.Parameter("Порт", "COM1"))
-        # self.network_state.append(network_devices.Parameter("Стоп бит", "1"))
-        # self.network_state.append(network_devices.Parameter("Четность", "none"))
-        self.network_state.append(network_devices.Parameter("скорость", "19200"))
-        # меню
+
+
+        # -------------------------Действия----------------------------------------------------
         exit_action = QtW.QAction(QIcon('pics\\exit.png'), 'Закрыть', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
@@ -35,32 +33,40 @@ class GuiImitator(QtW.QMainWindow):
         new_device.setShortcut('Ctrl+A')
         new_device.setStatusTip('Добавить устройство')
         new_device.triggered.connect(self.add_device)
-        new_device.setEnabled(self.is_network_ok())
+        # new_device.setEnabled(self.is_network_ok())
 
         delete_device = QtW.QAction(QIcon('pics\\del.bmp'), "Удалить устройство", self)
         delete_device.setShortcut('Ctrl+X')
         delete_device.setStatusTip('Удалить устройство')
         delete_device.triggered.connect(self.remove_current_zdv)
-        delete_device.setEnabled(self.is_network_ok())
+
+        new_network = QtW.QAction("Добавить Modbus RTU slave", self)
+        new_network.setShortcut("Ctrl+M")
+        new_network.setStatusTip("Добавить сеть Modbus RTU slave")
+        new_network.triggered.connect(self.add_network)
+
+        # ------------------------- меню ---------------------------------------------
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu('Файл')
         file_menu.addAction(exit_action)
 
+        network = menubar.addMenu("Сеть")
+        network.addAction(new_network)
+
         devices_menu = menubar.addMenu("Устройства")
         devices_menu.addAction(new_device)
         devices_menu.addAction(delete_device)
 
+        # -------------------Тул бар-------------------------------
 
-        # Тул бар
         self.toolbar = self.addToolBar('Выход')
         self.toolbar.addAction(exit_action)
         self.toolbar.addAction(new_device)
         self.toolbar.addAction(delete_device)
 
-
-
         # главный виджет главного окна с вертикальной разметкой
+
         self.central_widget = QtW.QWidget(self)
         self.vbox_central_widget = QtW.QVBoxLayout(self.central_widget)
         self.network_widget = NetworkGui(self, self.network_state)
@@ -73,6 +79,8 @@ class GuiImitator(QtW.QMainWindow):
         self.device_list = []
         self.device_tab.update_state(self.device_list)
         self.setCentralWidget(self.central_widget)
+
+        # delete_device.setEnabled(self.is_network_ok() and not self.device_tab.is_empty)
 
     def is_network_ok(self):
         if len(self.network_state) == 0:
@@ -100,10 +108,64 @@ class GuiImitator(QtW.QMainWindow):
 
     def remove_current_zdv(self):
         curent_device_index = self.device_tab.currentIndex()
+        if curent_device_index == -1:
+            return
         released_adress = self.device_list[curent_device_index].adress
         self.network_widget.free_adresses_lst.append(released_adress)
         self.device_list.pop(curent_device_index)
         self.device_tab.update_state(self.device_list)
+
+    def add_network(self):
+        dialog = NetworkAdditionDialog(self)
+        dialog.show()
+
+
+class NetworkAdditionDialog(QtW.QDialog):
+    def __init__(self, parent):
+        super(NetworkAdditionDialog, self).__init__(parent)
+        self.setWindowTitle("Добавление Modbus RTU")
+        self.layout = QtW.QVBoxLayout(self)
+        self.parent = parent
+        self.network_state = parent.network_state
+
+        port = network_devices.Parameter("Порт", "COM1")
+        port.set_possible_states(("COM1", "COM2", "COM3"))
+        self.network_state.append(port)
+
+        stop_bit = network_devices.Parameter("Стоп бит", "1")
+        stop_bit.set_possible_states(("1", "1.5", "2"))
+        self.network_state.append(stop_bit)
+
+        parity = network_devices.Parameter("Четность", "none")
+        parity.set_possible_states(("none", "even", "odd"))
+        self.network_state.append(parity)
+
+        baud_rate = network_devices.Parameter("скорость", "19200")
+        baud_rate.set_possible_states(("9600", "19200"))
+        self.network_state.append(baud_rate)
+
+        form_layout = QtW.QFormLayout()
+        comboboxes = []
+        print(self.network_state)
+        for index, parameter in enumerate(self.network_state):
+            lbl = QtW.QLabel(text=parameter.name)
+            combobox = QtW.QComboBox()
+            comboboxes.append(combobox)
+            possible_states = parameter.get_possible_states()
+            for item in possible_states:
+                combobox.addItem(item)
+            form_layout.setWidget(index,  QtW.QFormLayout.LabelRole, lbl)
+            form_layout.setWidget(index, QtW.QFormLayout.FieldRole, combobox)
+
+        self.button_box = QtW.QDialogButtonBox(self)
+        self.button_box.setStandardButtons(QtW.QDialogButtonBox.Cancel | QtW.QDialogButtonBox.Ok)
+        self.button_box.accepted.connect(self.the_editing_finished)
+        self.button_box.rejected.connect(self.reject)
+        self.layout.addLayout(form_layout)
+        self.layout.addWidget(self.button_box)
+
+    def the_editing_finished(self):
+        self.parent.network_widget.update()
 
 
 class DeviceAdditionDialog(QtW.QDialog):
@@ -187,7 +249,7 @@ class NetworkGui(QtW.QFrame):
     """Виджет состояния сети
     """
 
-    def __init__(self, parent_widget, network_settings: dict):
+    def __init__(self, parent_widget, network_settings):
         super(NetworkGui, self).__init__(parent_widget)
         self.setFrameShadow(QtW.QFrame.Sunken)
         self.setFrameShape(QtW.QFrame.Box)
@@ -197,11 +259,22 @@ class NetworkGui(QtW.QFrame):
 
         for setting in self.settings:
              label = QtW.QLabel()
-             label.setText(setting.info())
+             label.setText(self.setting.info())
              self.lbl_list.append(label)
              self.horizontalLayout.addWidget(label)
 
         self.free_adresses_lst = [x for x in range(1, 248)]
+
+    def update(self):
+        super(NetworkGui, self).update()
+
+        for setting in self.settings:
+            label = QtW.QLabel()
+            label.setText(setting.info())
+            self.lbl_list.append(label)
+            self.horizontalLayout.addWidget(label)
+
+
 
 
 class DeviceTab(QtW.QTabWidget):
@@ -210,6 +283,10 @@ class DeviceTab(QtW.QTabWidget):
     def __init__(self, parent):
         super(DeviceTab, self).__init__(parent)
         self.device_lst = []
+
+    def is_empty(self):
+
+        return True if len(self.device_lst) == 0 else False
 
     def update_state(self, device_list):
         while len(self.device_lst) > 0:
