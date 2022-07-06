@@ -22,7 +22,6 @@ class GuiImitator(QtW.QMainWindow):
 
         self.network_state = []
 
-
         # -------------------------Действия----------------------------------------------------
         exit_action = QtW.QAction(QIcon('pics\\exit.png'), 'Закрыть', self)
         exit_action.setShortcut('Ctrl+Q')
@@ -127,6 +126,7 @@ class NetworkAdditionDialog(QtW.QDialog):
         self.layout = QtW.QVBoxLayout(self)
         self.parent = parent
         self.network_state = parent.network_state
+        self.network_state.clear()
 
         port = network_devices.Parameter("Порт", "COM1")
         port.set_possible_states(("COM1", "COM2", "COM3"))
@@ -145,16 +145,16 @@ class NetworkAdditionDialog(QtW.QDialog):
         self.network_state.append(baud_rate)
 
         form_layout = QtW.QFormLayout()
-        comboboxes = []
+        self.comboboxes = []
         print(self.network_state)
         for index, parameter in enumerate(self.network_state):
             lbl = QtW.QLabel(text=parameter.name)
             combobox = QtW.QComboBox()
-            comboboxes.append(combobox)
+            self.comboboxes.append(combobox)
             possible_states = parameter.get_possible_states()
             for item in possible_states:
                 combobox.addItem(item)
-            form_layout.setWidget(index,  QtW.QFormLayout.LabelRole, lbl)
+            form_layout.setWidget(index, QtW.QFormLayout.LabelRole, lbl)
             form_layout.setWidget(index, QtW.QFormLayout.FieldRole, combobox)
 
         self.button_box = QtW.QDialogButtonBox(self)
@@ -165,6 +165,9 @@ class NetworkAdditionDialog(QtW.QDialog):
         self.layout.addWidget(self.button_box)
 
     def the_editing_finished(self):
+
+        for index, state in enumerate(self.network_state):
+            state.new_value()
         self.parent.network_widget.update()
 
 
@@ -257,11 +260,11 @@ class NetworkGui(QtW.QFrame):
         self.lbl_list = []
         self.horizontalLayout = QtW.QHBoxLayout(self)
 
-        for setting in self.settings:
-             label = QtW.QLabel()
-             label.setText(self.setting.info())
-             self.lbl_list.append(label)
-             self.horizontalLayout.addWidget(label)
+        for _ in self.settings:
+            label = QtW.QLabel()
+            label.setText(self.setting.info())
+            self.lbl_list.append(label)
+            self.horizontalLayout.addWidget(label)
 
         self.free_adresses_lst = [x for x in range(1, 248)]
 
@@ -273,8 +276,6 @@ class NetworkGui(QtW.QFrame):
             label.setText(setting.info())
             self.lbl_list.append(label)
             self.horizontalLayout.addWidget(label)
-
-
 
 
 class DeviceTab(QtW.QTabWidget):
